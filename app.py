@@ -83,6 +83,11 @@ class ClothingItem:
 #     session['usr'] = user_id
 #     return 
 
+@app.route('/')
+
+def default():
+    return render_template('home.html')
+
 
 ################ HOME #######################
 @app.route('/home')
@@ -108,11 +113,7 @@ def login():
         try:
             user = auth.sign_in_with_email_and_password(email,password)
             session['currUser'] = user['localId']
-            # user = auth.refresh(user['refreshToken'])
-            # user_id = user['idToken']
-            # session['usr'] = user_id
-            # auth.current_user
-            
+
             return redirect(url_for('home'))
         except:
             flash("Bad Login")
@@ -157,12 +158,10 @@ def createUser():
             user = auth.create_user_with_email_and_password(email,password)
             
             id = session.get('currUser', None)
-            #user = auth.sign_in_with_email_and_password(email,password)
             itemInfo={'firstName':firstName, 'lastName':lastName, 'email':email, 'userID': id}
             db.child("Users").push(itemInfo)
             
             
-            # flash("User Created")
             return redirect(url_for('profile'))
         except:
             flash("Invalid Email/Password")
@@ -298,6 +297,8 @@ def deleteItem(id):
     uIDList = []
     for i in uID.each():
         uIDList.append(i.key())
+
+    db.child("Clothes").child(id).remove()
 
 
     return redirect(url_for('clothesList'))
