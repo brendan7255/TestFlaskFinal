@@ -1,0 +1,44 @@
+<!-- This will display all of the users information and recent clothes they added-->
+
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+{{ clothes }}
+
+{% for message in get_flashed_messages() %}
+
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        {{ message }}
+    </div>
+
+{% endfor %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+
+
+        {{ form.upload.label(class="form-label") }}
+        {{ form.upload(class="form-control") }}
+
+        {{ form.title.label(class="form-label") }}
+        {{ form.title(class="form-control", value=clothList.title) }}
+
+        {{ form.category.label(class="form-label") }}
+        {{ form.category(class="form-control", value=clothList.category) }}
+
+        {{ form.pattern.label(class="form-label") }}
+        {{ form.pattern(class="form-control", value=clothList.pattern) }}
+
+        {{ form.season.label(class="form-label") }}
+        {{ form.season(class="form-control", value=clothList.season) }}
+        <br/>
+        {{ form.submit(class="btn-secondary") }}
+
+    </form>
+
+
+
+{% endblock %}
