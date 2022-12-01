@@ -90,9 +90,9 @@ class ClothingItem:
 def home():
     if('currUser' in  session):
         sID = session['currUser']
-        return render_template('home.html', sID=sID)
+        return render_template('profile.html', sID=sID)
     else:
-        return render_template('createUser.html')
+        return render_template('home.html')
 
 ################ LOGIN #######################
 @app.route('/login', methods=['GET', 'POST'])
@@ -125,7 +125,10 @@ def login():
 
 ################ LOGOUT #######################
 def logout():
-    session.pop('currUser')
+    if('currUser' in session):
+        session.pop('currUser')
+        return render_template('home.html')
+    
     return render_template('home.html')
 
 
@@ -181,48 +184,50 @@ def profile():
 @app.route('/addClothes', methods=['GET', 'POST'])
 
 def addClothes():
+    if('currUser' in session):
+        upload = None
+        title = None
+        category = None
+        pattern = None
+        season = None
+        form = ClothingForm()
 
-    upload = None
-    title = None
-    category = None
-    pattern = None
-    season = None
-    form = ClothingForm()
+        id = session['currUser']
+        if form.validate_on_submit():
+            upload = form.upload.data
+            title = form.title.data
+            category = form.category.data
+            pattern = form.pattern.data
+            season = form.season.data
+            
+            form.upload.data = ''
+            form.title.data = ''
+            form.category.data = ''
+            form.pattern.data = ''
+            form.season.data = ''
+            
+            clothing_filename = secure_filename(upload.filename)
 
-    id = session['currUser']
-    if form.validate_on_submit():
-        upload = form.upload.data
-        title = form.title.data
-        category = form.category.data
-        pattern = form.pattern.data
-        season = form.season.data
-        
-        form.upload.data = ''
-        form.title.data = ''
-        form.category.data = ''
-        form.pattern.data = ''
-        form.season.data = ''
-        
-        clothing_filename = secure_filename(upload.filename)
+            cname = str(uuid.uuid1()) + "" + clothing_filename
 
-        cname = str(uuid.uuid1()) + "" + clothing_filename
+            storage.child("ClothPics/" + cname).put(upload)
+            url=storage.child("ClothPics/" + cname).get_url(None)
 
-        storage.child("ClothPics/" + cname).put(upload)
-        url=storage.child("ClothPics/" + cname).get_url(None)
+            
+            flash("Clothes Added")
+            itemInfo={'title':title, 'pattern':pattern, 'season':season, 'category':category, 'url':url, 'userID':id}
 
-        
-        flash("Clothes Added")
-        itemInfo={'title':title, 'pattern':pattern, 'season':season, 'category':category, 'url':url, 'userID':id}
-
-        db.child("Clothes").push(itemInfo)
-        
-    return render_template("addClothes.html", 
-        upload = upload,
-        title = title,
-        category = category,
-        pattern = pattern,
-        season = season,
-        form = form)
+            db.child("Clothes").push(itemInfo)
+            
+        return render_template("addClothes.html", 
+            upload = upload,
+            title = title,
+            category = category,
+            pattern = pattern,
+            season = season,
+            form = form)
+    else:
+        return render_template('home.html')
 
 
 
